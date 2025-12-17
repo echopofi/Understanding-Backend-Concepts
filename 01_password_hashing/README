@@ -1,0 +1,102 @@
+01 - Password Hashing with Python (bcrypt)
+
+This folder contains the utility scripts used to learn and test secure password handling using the bcrypt library.
+
+The Core Concept: Why Hashing Works
+
+Passwords are never stored in plain text. We use a one-way function (hashing) to store a secure representation of the password.
+
+The critical security element is the salt: a random string generated uniquely for each user. This prevents dictionary attacks and rainbow tables, as the same password will produce a different hash every time due to the unique salt.
+
+Key Learning: hashpw() vs. checkpw()
+
+The main confusion in implementation is knowing when to use which function:
+
+Function
+
+Use Case
+
+Result
+
+bcrypt.hashpw(password, salt)
+
+Registration/Storage: Used once to generate the hash that will be stored in the database.
+
+A new hash string that contains the random salt embedded within it.
+
+bcrypt.checkpw(password_attempt, stored_hash)
+
+Login/Verification: Used every time a user tries to log in.
+
+True or False.
+
+Crucial: The checkpw function automatically extracts the original salt from the stored_hash and uses that specific salt to hash the password_attempt. If the resulting hash matches the stored_hash, access is granted.
+
+File: hash_verifier.py
+
+This script demonstrates the correct login verification flow:
+
+A password is taken and hashed ONCE (bcrypt.gensalt()).
+
+A second password attempt is taken.
+
+The attempt is verified against the original stored hash using bcrypt.checkpw().
+
+
+Errors encountered and Fixes:
+1.  Your code is always hitting the else block because you are using bcrypt.gensalt() twice, which means you are hashing the password twice with different, random salts.
+
+The Reason for the Failure
+Here is why hashed == _hashed will virtually always be False:
+
+Line 10 (hashed = bcrypt.hashpw(p, bcrypt.gensalt())):
+
+bcrypt.gensalt() generates a unique, random 16-byte salt (a random string).
+
+This salt is used to hash the password (p).
+
+The resulting hashed variable stores the salt and the hash together.
+
+Line 13 (_hashed = bcrypt.hashpw(_p, bcrypt.gensalt())):
+
+You call bcrypt.gensalt() AGAIN. This generates a completely different random salt.
+
+This new salt is used to hash the confirmation password (_p).
+
+Even if the input passwords are the same (p == _p), the salts are different, guaranteeing that hashed will NOT equal _hashed.
+
+The Correct Way to Verify Passwords
+The purpose of bcrypt is not to compare two newly generated hashes. The secure way to verify a password is to use the stored hash (which already contains the original salt) against the new, plain-text password attempt.
+
+The bcrypt.checkpw() function handles this for you:
+
+It takes the new, plain-text password attempt.
+
+It extracts the original salt from the stored hash.
+
+It hashes the new password attempt using the extracted original salt.
+
+It compares the result of step 3 to the stored hash.
+
+
+2.  The ValueError on line 19 is caused by swapping the arguments in the bcrypt.checkpw() function.
+
+The Reason for the ValueError
+The bcrypt.checkpw() function has a very strict signature:
+
+Python
+
+bcrypt.checkpw(plain_password_bytes, stored_hash_bytes)
+Your code (Line 19):
+
+Python
+
+if bcrypt.checkpw(hashed, _p):
+First argument (hashed): You are passing the already-hashed password (which is a long string of garbage data, salt included). checkpw expects the short, plain-text password here.
+
+Second argument (_p): You are passing the encoded plain-text password attempt from the user input. checkpw expects the long, stored hash string here.
+
+The Error: When checkpw receives the short, plain-text bytes (_p) as the second argument (where the full hash is expected), it immediately fails because the data format does not look like a valid bcrypt hash, resulting in the ValueError: Invalid salt or hash format.
+
+The Fix
+You simply need to switch the order of the arguments so the plain-text attempt (_p) comes first, and the stored hash (hashed) comes second.

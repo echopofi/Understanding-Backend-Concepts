@@ -1,0 +1,19 @@
+ Understanding Backend Concepts
+
+This repository serves as a portfolio and learning resource, documenting key concepts and practical implementations required for modern Web 2 backend development.
+
+Each major concept is isolated in its own folder for easy review and testing.
+
+Concepts Covered
+
+Folder
+
+Topic
+
+Key Takeaways
+
+01_password_hashing
+
+Password Hashing (bcrypt)
+
+Demonstrates the correct usage of salt generation and the critical difference between bcrypt.hashpw() and bcrypt.checkpw().
