@@ -1,0 +1,19 @@
+A simple Python script demonstrating secure password hashing using **bcrypt** and professional logging practices.
+
+## Features
+
+- Secure password hashing with **bcrypt** (random salt, 12 rounds)
+- Proper verification of passwords
+- Structured logging to both **console** and **file**
+- Uses advanced logging handlers (console + file)
+- Clean separation of user output (`print`) and developer logs (`logger`)
+- Never logs raw passwords (security best practice)
+
+## Requirements
+
+- Python 3.6+
+- bcrypt library
+
+Install dependency:
+```bash
+pip install bcrypt
